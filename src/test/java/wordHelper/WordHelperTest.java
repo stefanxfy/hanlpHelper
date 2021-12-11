@@ -1,6 +1,7 @@
 package wordHelper;
 
 import com.hankcs.hanlp.collection.AhoCorasick.AhoCorasickDoubleArrayTrie;
+import com.hankcs.hanlp.dictionary.CustomDictionary;
 import org.junit.Test;
 
 import java.util.*;

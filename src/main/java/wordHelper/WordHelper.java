@@ -165,6 +165,7 @@ public class WordHelper {
         final String[] wordNet = new String[charArray.length];
         final int[] lengthNet = new int[charArray.length];
         trie.parseText(charArray, new AhoCorasickDoubleArrayTrie.IHit<String>() {
+            @Override
             public void hit(int begin, int end, String value) {
                 int length = end - begin;
                 if (length > lengthNet[begin]) {
