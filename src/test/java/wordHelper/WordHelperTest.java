@@ -1,7 +1,6 @@
 package wordHelper;
 
 import com.hankcs.hanlp.collection.AhoCorasick.AhoCorasickDoubleArrayTrie;
-import com.hankcs.hanlp.dictionary.CustomDictionary;
 import org.junit.Test;
 
 import java.util.*;
@@ -15,6 +14,12 @@ public class WordHelperTest {
 
     @Test
     public void convertToSimplifiedChinese() {
+        Map<String, String> customMap = new HashMap<String, String>();
+        customMap.put("馬英九", "大傻子");
+        Map<String, String> excludedMap = new HashMap<String, String>();
+        excludedMap.put("士多啤梨", "草莓");
+        WordHelper.loadTraditionalChineseDictionary(customMap, excludedMap);
+
         LinkedHashMap<Integer, String[]> destOriginMap = new LinkedHashMap<Integer, String[]>();
         String content = "白皮書說，書鐵桿部隊憤怒情緒集結書馬英九腹背受敵。以後等妳當上皇后，就能買士多啤梨慶祝了";
         String rt = WordHelper.convertToSimplifiedChinese(content, destOriginMap);
