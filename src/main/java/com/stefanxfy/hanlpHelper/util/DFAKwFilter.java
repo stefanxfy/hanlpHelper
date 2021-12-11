@@ -1,4 +1,4 @@
-package wordHelper;
+package com.stefanxfy.hanlpHelper.util;
 
 import java.util.*;
 

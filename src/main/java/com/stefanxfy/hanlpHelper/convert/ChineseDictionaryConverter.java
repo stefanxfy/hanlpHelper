@@ -1,4 +1,4 @@
-package wordHelper;
+package com.stefanxfy.hanlpHelper.convert;
 
 import com.hankcs.hanlp.HanLP;
 import com.hankcs.hanlp.collection.AhoCorasick.AhoCorasickDoubleArrayTrie;
@@ -8,10 +8,11 @@ import com.hankcs.hanlp.utility.Predefine;
 import java.util.*;
 
 /**
+ * 中文词典转换工具
  * @author stefan
  * @date 2021/12/9 10:28
  */
-public class WordHelper {
+public class ChineseDictionaryConverter {
     /**
      * 注：HanLP内存要求120MB以上（-Xms120m -Xmx120m -Xmn64m）
      * HanLP首次需要加载词库到内存中，所以首次会较慢，几十ms或者几百ms
@@ -21,8 +22,8 @@ public class WordHelper {
      * @param content
      * @return
      */
-    public static String convertToSimplifiedChinese(String content) {
-        return TRAD_TO_SIMP.convertTo(content);
+    public static String toSimplifiedChinese(String content) {
+        return TRAD_TO_SIMP.convert(content);
     }
 
     /**
@@ -32,8 +33,8 @@ public class WordHelper {
      * @param destOriginMap key为 转换之后字符在转换文本的位置，value为[转换之后字符, 原字符]
      * @return
      */
-    public static String convertToSimplifiedChinese(String content, LinkedHashMap<Integer, String[]> destOriginMap) {
-        return TRAD_TO_SIMP.convertTo(content, destOriginMap);
+    public static String toSimplifiedChinese(String content, LinkedHashMap<Integer, String[]> destOriginMap) {
+        return TRAD_TO_SIMP.convert(content, destOriginMap);
     }
 
     /**
@@ -42,8 +43,8 @@ public class WordHelper {
      * @param content
      * @return
      */
-    public static String convertToTraditionalChinese(String content) {
-        return SIMP_TO_TRAD.convertTo(content);
+    public static String toTraditionalChinese(String content) {
+        return SIMP_TO_TRAD.convert(content);
     }
 
     /**
@@ -53,8 +54,8 @@ public class WordHelper {
      * @param destOriginMap key为 转换之后字符在转换文本的位置，value为[转换之后字符, 原字符]
      * @return
      */
-    public static String convertToTraditionalChinese(String content, LinkedHashMap<Integer, String[]> destOriginMap) {
-        return SIMP_TO_TRAD.convertTo(content, destOriginMap);
+    public static String toTraditionalChinese(String content, LinkedHashMap<Integer, String[]> destOriginMap) {
+        return SIMP_TO_TRAD.convert(content, destOriginMap);
     }
 
     /**
@@ -81,7 +82,7 @@ public class WordHelper {
     }
 
     /**
-     * 单个 词组 倒带
+     * 单个 词语 倒带
      * @param word
      * @param destIndex 该词组在目的文本的位置
      * @param destOriginMap
@@ -113,27 +114,51 @@ public class WordHelper {
      * @param excludedMap 排除词组，key-繁体字，value-简体字，从词典中排除时，必须key和value都相等
      * @return
      */
-    public static boolean loadTraditionalChineseDictionary(Map<String, String> customMap, Map<String, String> excludedMap) {
+    public static boolean loadTraditional(Map<String, String> customMap, Map<String, String> excludedMap) {
         return TRAD_TO_SIMP.load(customMap, excludedMap);
     }
 
-    public static boolean loadTraditionalChineseDictionary(Map<String, String> customMap) {
-        return loadTraditionalChineseDictionary(customMap, null);
+    public static boolean loadTraditional(Map<String, String> customMap) {
+        return loadTraditional(customMap, null);
     }
 
-    public static boolean loadSimplifiedChineseDictionary(Map<String, String> customMap, Map<String, String> excludedMap) {
+    public static boolean loadSimplified(Map<String, String> customMap, Map<String, String> excludedMap) {
         return SIMP_TO_TRAD.load(customMap, excludedMap);
     }
 
-    public static boolean loadSimplifiedChineseDictionary(Map<String, String> customMap) {
-        return loadSimplifiedChineseDictionary(customMap, null);
+    public static boolean loadSimplified(Map<String, String> customMap) {
+        return loadSimplified(customMap, null);
     }
 
+    private interface ChineseDictionary {
+        /**
+         *
+         * @param customMap 用户自定义词典
+         * @param excludedMap 排除某些词组
+         * @return
+         */
+        boolean load(Map<String, String> customMap, Map<String, String> excludedMap);
+
+        /**
+         *
+         * @param originContent 原文
+         * @return 译文
+         */
+        String convert(String originContent);
+
+        /**
+         *
+         * @param originContent 原文
+         * @param destOriginMap destOriginMap 不为null，可获取转换之后 index 和目的字符+原字符的关系
+         * @return
+         */
+        String convert(String originContent, final Map<Integer, String[]> destOriginMap);
+    }
 
     /**
      * 繁简词典
      */
-    private static class TraditionalChineseDictionary {
+    private static class TraditionalChineseDictionary implements ChineseDictionary {
         private String path;
         private volatile AhoCorasickDoubleArrayTrie<String> trie;
 
@@ -141,14 +166,7 @@ public class WordHelper {
             this.path = path;
         }
 
-        public boolean load() {
-            return load(null, null);
-        }
-
-        public boolean load(Map<String, String> customMap) {
-            return load(customMap, null);
-        }
-
+        @Override
         public boolean load(Map<String, String> customMap, Map<String, String> excludedMap) {
             if (trie != null) {
                 return true;
@@ -184,12 +202,22 @@ public class WordHelper {
             }
         }
 
-        public String convertTo(String traditionalChineseString) {
-            return convertTo(traditionalChineseString, null);
+        public boolean load() {
+            return load(null, null);
         }
 
-        public String convertTo(String traditionalChineseString, final Map<Integer, String[]> destOriginMap) {
-            if (!load(null)) {
+        public boolean load(Map<String, String> customMap) {
+            return load(customMap, null);
+        }
+
+        @Override
+        public String convert(String traditionalChineseString) {
+            return convert(traditionalChineseString, null);
+        }
+
+        @Override
+        public String convert(String traditionalChineseString, final Map<Integer, String[]> destOriginMap) {
+            if (!load()) {
                 throw new IllegalArgumentException("load err, path=" + path);
             }
             return segLongest(traditionalChineseString.toCharArray(), trie, destOriginMap);
@@ -259,7 +287,7 @@ public class WordHelper {
     /**
      * 简繁词典
      */
-    private static class SimplifiedChineseDictionary extends TraditionalChineseDictionary{
+    private static class SimplifiedChineseDictionary extends TraditionalChineseDictionary {
         public SimplifiedChineseDictionary(String path) {
             super(path);
         }
@@ -268,7 +296,7 @@ public class WordHelper {
     private static final String TRAD_TO_SIMP_PATH = HanLP.Config.tcDictionaryRoot + "t2s.txt";
     private static final String SIMP_TO_TRAD_PATH = HanLP.Config.tcDictionaryRoot + "s2t.txt";
 
-    private static final TraditionalChineseDictionary TRAD_TO_SIMP = new TraditionalChineseDictionary(TRAD_TO_SIMP_PATH);
-    private static final SimplifiedChineseDictionary SIMP_TO_TRAD = new SimplifiedChineseDictionary(SIMP_TO_TRAD_PATH);
+    private static final ChineseDictionary TRAD_TO_SIMP = new TraditionalChineseDictionary(TRAD_TO_SIMP_PATH);
+    private static final ChineseDictionary SIMP_TO_TRAD = new SimplifiedChineseDictionary(SIMP_TO_TRAD_PATH);
 
 }

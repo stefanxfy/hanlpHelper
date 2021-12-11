@@ -1,6 +1,8 @@
-package wordHelper;
+package com.stefanxfy.hanlpHelper;
 
 import com.hankcs.hanlp.collection.AhoCorasick.AhoCorasickDoubleArrayTrie;
+import com.stefanxfy.hanlpHelper.convert.ChineseDictionaryConverter;
+import com.stefanxfy.hanlpHelper.util.DFAKwFilter;
 import org.junit.Test;
 
 import java.util.*;
@@ -9,7 +11,7 @@ import java.util.*;
  * @author stefan
  * @date 2021/12/9 11:53
  */
-public class WordHelperTest {
+public class ChineseDictionaryConverterTest {
     public static AhoCorasickDoubleArrayTrie<String> trie = new AhoCorasickDoubleArrayTrie();
 
     @Test
@@ -18,18 +20,18 @@ public class WordHelperTest {
         customMap.put("馬英九", "大傻子");
         Map<String, String> excludedMap = new HashMap<String, String>();
         excludedMap.put("士多啤梨", "草莓");
-        WordHelper.loadTraditionalChineseDictionary(customMap, excludedMap);
+        ChineseDictionaryConverter.loadTraditional(customMap, excludedMap);
 
         LinkedHashMap<Integer, String[]> destOriginMap = new LinkedHashMap<Integer, String[]>();
         String content = "白皮書說，書鐵桿部隊憤怒情緒集結書馬英九腹背受敵。以後等妳當上皇后，就能買士多啤梨慶祝了";
-        String rt = WordHelper.convertToSimplifiedChinese(content, destOriginMap);
+        String rt = ChineseDictionaryConverter.toSimplifiedChinese(content, destOriginMap);
         for (Map.Entry<Integer, String[]> integerEntry : destOriginMap.entrySet()) {
             System.out.println(integerEntry.getKey() + "::" + integerEntry.getValue()[0] + "=" + integerEntry.getValue()[1]);
         }
         System.out.println(content);
         System.out.println(rt);
         // 倒带恢复原文
-        String rewindContent = WordHelper.rewind(rt, destOriginMap);
+        String rewindContent = ChineseDictionaryConverter.rewind(rt, destOriginMap);
         System.out.println(rewindContent);
     }
 
@@ -42,7 +44,7 @@ public class WordHelperTest {
                 "白皮书介绍，中国的民主是人民民主，人民当家作主是中国民主的本质和核心。全过程人民民主，实现了过程民主和成果民主、程序民主和实质民主、直接民主和间接民主、人民民主和国家意志相统一，是全链条、全方位、全覆盖的民主，是最广泛、最真实、最管用的社会主义民主。\n" +
                 "白皮书强调，民主是历史的、具体的、发展的，各国民主植根于本国的历史文化传统，成长于本国人民的实践探索和智慧创造，民主道路不同，民主形态各异。民主不是装饰品，不是用来做摆设的，而是要用来解决人民需要解决的问题的。民主是各国人民的权利，而不是少数国家的专利。\n" +
                 "白皮书指出，一个国家是不是民主，应该由这个国家的人民来评判，而不应该由外部少数人指手画脚来评判。";
-        String rt = WordHelper.convertToTraditionalChinese(content, destOriginMap);
+        String rt = ChineseDictionaryConverter.toTraditionalChinese(content, destOriginMap);
         for (Map.Entry<Integer, String[]> integerEntry : destOriginMap.entrySet()) {
             System.out.println(integerEntry.getKey() + "::" + integerEntry.getValue()[0] + "=" + integerEntry.getValue()[1]);
         }
@@ -51,7 +53,7 @@ public class WordHelperTest {
         System.out.println(rt);
         System.out.println("--------------------------------------------");
         // 倒带恢复原文
-        String rewindContent = WordHelper.rewind(rt, destOriginMap);
+        String rewindContent = ChineseDictionaryConverter.rewind(rt, destOriginMap);
         System.out.println(rewindContent);
 
     }
@@ -68,7 +70,7 @@ public class WordHelperTest {
         // 转换
         LinkedHashMap<Integer, String[]> destOriginMap = new LinkedHashMap<Integer, String[]>();
 
-        String rt = WordHelper.convertToSimplifiedChinese(content, destOriginMap);
+        String rt = ChineseDictionaryConverter.toSimplifiedChinese(content, destOriginMap);
 
         for (Map.Entry<Integer, String[]> destOriginEntry : destOriginMap.entrySet()) {
             System.out.println(destOriginEntry.getKey() + "::" + destOriginEntry.getValue()[0] + "=" + destOriginEntry.getValue()[1]);
@@ -83,7 +85,7 @@ public class WordHelperTest {
             List<String> originWordList = new ArrayList<String>();
 
             for (Integer index : stringListEntry.getValue()) {
-                originWordList.add(WordHelper.rewind(word, index, destOriginMap));
+                originWordList.add(ChineseDictionaryConverter.rewind(word, index, destOriginMap));
             }
             listMap.put(word, originWordList);
         }
